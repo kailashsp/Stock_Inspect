@@ -1,3 +1,13 @@
+---
+title: STOCK_INSPECT
+emoji: 📊
+colorFrom: gray
+colorTo: pink
+sdk: docker
+pinned: false
+license: apache-2.0
+---
+
 # Stock Inspect
 
 ## Introduction
