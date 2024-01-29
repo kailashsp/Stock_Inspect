@@ -3,7 +3,7 @@ title: STOCK_INSPECT
 emoji: 📊
 colorFrom: gray
 colorTo: pink
-sdk: docker
+sdk: streamlit
 pinned: false
 license: apache-2.0
 ---
