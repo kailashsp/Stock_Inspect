@@ -4,3 +4,4 @@ google-generativeai==0.3.2
 langchain==0.1.4
 langchain-community==0.0.16
 unstructured[docx,pptx]
+python-dotenv==1.0.1
