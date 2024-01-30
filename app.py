@@ -17,7 +17,7 @@ st.markdown("### 📈 Stock Picker")
 
 left_co, cent_co,last_co = st.columns(3)
 with cent_co:
-    st.image(image=".streamlit/stock-market.png", width=100)
+    st.image(image=".streamlit/stock-market.png", width=300)
 
 st.markdown("---")
 
