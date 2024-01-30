@@ -12,12 +12,17 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+st.markdown("### 📈 Stock Picker")
+
 left_co, cent_co,last_co = st.columns(3)
 with cent_co:
-    st.image(image=".streamlit/stock-market.png")
+    st.image(image=".streamlit/stock-market.png", width=100)
+
+st.markdown("---")
 
 
-stocks = pd.read_excel("MCAP31122023.xlsx").set_index('Symbol')
+stocks = pd.read_excel("MCAP31122023.xlsx").set_index('Company Name')
 
 url = "https://ticker.finology.in/company/"
 
@@ -28,7 +33,7 @@ def search_stocks(searchterm: str):
     if not searchterm:
         return []
     matching_stocks = stocks[stocks.index.str.contains(searchterm, case=False, na=False)]
-    return matching_stocks.index.tolist()
+    return matching_stocks['Symbol'].tolist()
 
 
 selected_value = st_searchbox(
