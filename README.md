@@ -14,6 +14,8 @@ license: apache-2.0
 
 Stock Inspect is a Streamlit web application designed for stock analysis. It uses the Language Model (Gemini-pro from google)  to provide insights based on user-provided stock names from NSE. 
 
+[Try Hugging Face Demo from Here](https://huggingface.co/spaces/kailashsp/NSE-stock-picker)
+
 ## Installation
 
 1. Clone the repository:
