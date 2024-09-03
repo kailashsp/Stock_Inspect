@@ -1,8 +1,8 @@
 import pandas as pd
 import json
-from document_preprocessor import generate_document
+from document_preprocessor import extract_tables_and_content
+from fundamental_analysis import perform_analysis
 from llm import LLM
-from prompt import stock_analysis_prompt
 import streamlit as st
 from streamlit_searchbox import st_searchbox
 
@@ -13,19 +13,38 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown("### 📈 Stock Picker")
+st.markdown("""
+    <style>
+    .main {
+        padding: 2rem;
+    }
+    .stExpander {
+        background-color: #f0f2f6;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .stExpander > div > p {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-left_co, cent_co,last_co = st.columns(3)
-with cent_co:
-    st.image(image=".streamlit/stock-market.png", width=300)
+# st.markdown("### 📈 Stock Picker")
 
-st.markdown("---")
+# left_co, cent_co,last_co = st.columns(3)
+# with cent_co:
+#     st.image(image=".streamlit/stock-market.png", width=300)
+
+# st.markdown("---")
 
 
-stocks = pd.read_excel("MCAP31122023.xlsx").set_index('Company Name')
+@st.cache_data
+def stocks_list():
+    return pd.read_excel("MCAP31122023.xlsx").set_index('Company Name')
 
+stocks = stocks_list()
 url = "https://ticker.finology.in/company/"
-
 model = LLM(model_name="Gemini")
 
 # function with list of labels
@@ -43,30 +62,29 @@ selected_value = st_searchbox(
 
 if selected_value:
     stock_url = f"https://ticker.finology.in/company/{selected_value}"
-    stock_fundamentals = generate_document(stock_url)
-    prompt = stock_analysis_prompt.replace(
-        "{stock_name}",selected_value).replace("{context}",stock_fundamentals.page_content)
-    result = model(prompt=prompt).replace('```',"")
-    
-    try:
+    with st.spinner("Analyzing stock data..."):
+        tables, content = extract_tables_and_content(stock_url)
+        result = perform_analysis(tables, content)
         res = json.loads(result)
-        confidence_score = res['buy']
-        analysis = res["detailed_analysis"]
-
-        if confidence_score >= 75:
-            st.success("High Confidence Score!")
-        elif confidence_score > 40:
-            st.warning("Moderate Confidence Score.")
-        else:
-            st.error("Low Confidence Score.")
 
 
-        col1, col2 = st.columns(2)
-        col1.write(f'**Buy Confidence Score:** {str(confidence_score)}')
+    st.header("Stock Analysis")
+    col1, col2 = st.columns(2)
+    
+    for i, (parameters, values) in enumerate(res.items()):
+        with (col1 if i % 2 == 0 else col2):
+            with st.expander(parameters):
+                st.markdown(f"**Rating:** {values['rating']}")
+                st.markdown(f"**Reasoning:** {values['reasoning']}")
+    
+    # overall_score = sum(int(values['rating'].split('/')[0]) for values in res.values()) / len(res)
 
-        with st.expander("See explanation"):
-            st.write(f"**Detailed Analysis:** {analysis}")
-        st.markdown(f"[Learn more about {selected_value}]({stock_url})")
+    st.header("Additional Resources")
+    st.markdown(f"[Learn more about {selected_value}]({stock_url})")
+    st.markdown("[Finology - Stock Analysis Platform](https://ticker.finology.in/")
 
-    except:
-        st.write(result)
+else:
+    st.info("Please select a stock to view its analysis.")
+
+
+  
